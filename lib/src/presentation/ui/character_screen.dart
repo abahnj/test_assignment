@@ -22,31 +22,41 @@ class _CharactersScreenState extends State<CharactersScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF202428),
       body: SafeArea(
-        child: BlocBuilder<MainPageBloc, MainPageState>(
-          builder: (context, state) {
+        child: BlocListener<MainPageBloc, MainPageState>(
+          listener: (context, state) {
             if (state is UnSuccessfulMainPageState) {
-              return const Center(child: Text('failed to fetch characters'));
-            } else if (state is SuccessfulMainPageState) {
-              if (state.characters.isEmpty) {
-                return const Center(child: Text('No Return'));
-              }
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return index >= state.characters.length
-                      ? const BottomLoader()
-                      : CharacterWidget(character: state.characters[index]);
-                },
-                itemExtent: 178,
-                itemCount: state.characters.length + 1,
-                // itemCount: state.hasReachedMax
-                //     ? state.posts.length
-                //     : state.posts.length + 1,
-                controller: _scrollController,
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  backgroundColor: Colors.green,
+                  content: Text('Failed to fetch characters'),
+                ),
               );
-            } else {
-              return const Center(child: CircularProgressIndicator());
             }
           },
+          child: BlocBuilder<MainPageBloc, MainPageState>(
+            builder: (context, state) {
+              if (state is SuccessfulMainPageState) {
+                if (state.characters.isEmpty) {
+                  return const Center(child: Text('No Characters loaded'));
+                }
+                return ListView.builder(
+                  itemBuilder: (BuildContext context, int index) {
+                    return index >= state.characters.length
+                        ? const BottomLoader()
+                        : CharacterWidget(character: state.characters[index]);
+                  },
+                  itemExtent: 178,
+                  itemCount: state.characters.length + 1,
+                  // itemCount: state.hasReachedMax
+                  //     ? state.posts.length
+                  //     : state.posts.length + 1,
+                  controller: _scrollController,
+                );
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
         ),
       ),
     );

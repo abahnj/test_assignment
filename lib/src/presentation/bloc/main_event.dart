@@ -25,7 +25,7 @@ class LoadingDataOnMainPageEvent extends MainPageEvent {
 class DataLoadedOnMainPageEvent extends MainPageEvent {
   const DataLoadedOnMainPageEvent(this.characters);
 
-  final List<Character>? characters;
+  final List<Character> characters;
 
   @override
   List<Object?> get props => [characters];
