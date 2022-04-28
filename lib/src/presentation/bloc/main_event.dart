@@ -9,9 +9,7 @@ abstract class MainPageEvent extends Equatable {
 }
 
 class GetTestDataOnMainPageEvent extends MainPageEvent {
-  final int page;
-
-  const GetTestDataOnMainPageEvent(this.page);
+  const GetTestDataOnMainPageEvent();
 
   @override
   List<Object?> get props => [];
@@ -25,9 +23,9 @@ class LoadingDataOnMainPageEvent extends MainPageEvent {
 }
 
 class DataLoadedOnMainPageEvent extends MainPageEvent {
-  final List<Character>? characters;
-
   const DataLoadedOnMainPageEvent(this.characters);
+
+  final List<Character>? characters;
 
   @override
   List<Object?> get props => [characters];

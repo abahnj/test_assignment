@@ -1,31 +1,50 @@
-import 'package:casino_test/src/data/models/character.dart';
-import 'package:casino_test/src/data/repository/characters_repository.dart';
 import 'package:casino_test/src/presentation/bloc/main_bloc.dart';
 import 'package:casino_test/src/presentation/bloc/main_event.dart';
 import 'package:casino_test/src/presentation/bloc/main_state.dart';
+import 'package:casino_test/src/presentation/ui/widgets/bottom_loader.dart';
+import 'package:casino_test/src/presentation/ui/widgets/character_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 
 @immutable
-class CharactersScreen extends StatelessWidget {
+class CharactersScreen extends StatefulWidget {
+  const CharactersScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CharactersScreen> createState() => _CharactersScreenState();
+}
+
+class _CharactersScreenState extends State<CharactersScreen> {
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocProvider(
-        create: (context) => MainPageBloc(
-          InitialMainPageState(),
-          GetIt.I.get<CharactersRepository>(),
-        )..add(const GetTestDataOnMainPageEvent(1)),
-        child: BlocConsumer<MainPageBloc, MainPageState>(
-          listener: (context, state) {},
-          builder: (blocContext, state) {
-            if (state is LoadingMainPageState) {
-              return _loadingWidget(context);
+      backgroundColor: const Color(0xFF202428),
+      body: SafeArea(
+        child: BlocBuilder<MainPageBloc, MainPageState>(
+          builder: (context, state) {
+            if (state is UnSuccessfulMainPageState) {
+              return const Center(child: Text('failed to fetch characters'));
             } else if (state is SuccessfulMainPageState) {
-              return _successfulWidget(context, state);
+              if (state.characters.isEmpty) {
+                return const Center(child: Text('No Return'));
+              }
+              return ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  return index >= state.characters.length
+                      ? const BottomLoader()
+                      : CharacterWidget(character: state.characters[index]);
+                },
+                itemExtent: 178,
+                itemCount: state.characters.length + 1,
+                // itemCount: state.hasReachedMax
+                //     ? state.posts.length
+                //     : state.posts.length + 1,
+                controller: _scrollController,
+              );
             } else {
-              return Center(child: const Text("error"));
+              return const Center(child: CircularProgressIndicator());
             }
           },
         ),
@@ -33,58 +52,43 @@ class CharactersScreen extends StatelessWidget {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<MainPageBloc>().add(const GetTestDataOnMainPageEvent());
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.99);
+  }
+
   Widget _loadingWidget(BuildContext context) {
     return Center(
       child: Container(
         width: 50,
         height: 50,
-        margin: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         child: const CircularProgressIndicator(),
-      ),
-    );
-  }
-
-  Widget _successfulWidget(
-      BuildContext context, SuccessfulMainPageState state) {
-    return ListView.builder(
-      cacheExtent: double.infinity,
-      itemCount: state.characters.length,
-      itemBuilder: (context, index) {
-        return _characterWidget(context, state.characters[index]);
-      },
-    );
-  }
-
-  Widget _characterWidget(BuildContext context, Character character) {
-    return Container(
-      alignment: Alignment.topLeft,
-      padding: EdgeInsets.all(8),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        decoration: ShapeDecoration(
-          color: Color.fromARGB(120, 204, 255, 255),
-          shape: ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Text(character.name),
-            ),
-            Image.network(
-              character.image,
-              width: 50,
-              height: 50,
-            ),
-          ],
-        ),
       ),
     );
   }

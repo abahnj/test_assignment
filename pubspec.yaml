@@ -12,19 +12,36 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  get_it: ^7.2.0
-  flutter_bloc: ^8.0.1
+
+  cupertino_icons: ^1.0.4
   equatable: ^2.0.3
+  flutter_bloc: ^8.0.1
+  get_it: ^7.2.0
   http: ^0.13.4
-  json_annotation: ^4.4.0
-  cupertino_icons: ^1.0.2
+  json_annotation: ^4.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.0.0
-  json_serializable: ^6.0.0
-  flutter_lints: ^1.0.0
+
+  build_runner: ^2.1.10
+  flutter_lints: ^1.0.4
+  json_serializable: ^6.2.0
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: Gilroy
+      fonts:
+        - asset: assets/fonts/Gilroy-ExtraBold.otf
+
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+
+    - family: Product-Sans
+      fonts:
+        - asset: assets/fonts/Product_Sans_Regular.ttf
+        - asset: assets/fonts/Product_Sans_Bold.ttf

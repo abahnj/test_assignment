@@ -19,9 +19,9 @@ class UnSuccessfulMainPageState extends MainPageState {
 }
 
 class SuccessfulMainPageState extends MainPageState {
-  final List<Character> characters;
-
   SuccessfulMainPageState(this.characters);
+
+  final List<Character> characters;
 
   @override
   List<Object> get props => [characters];

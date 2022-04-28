@@ -3,31 +3,40 @@ import 'package:casino_test/src/presentation/bloc/main_event.dart';
 import 'package:casino_test/src/presentation/bloc/main_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MainPageBloc
-    extends Bloc<MainPageEvent, MainPageState> {
-  final CharactersRepository _charactersRepository;
-
+class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
   MainPageBloc(
     MainPageState initialState,
     this._charactersRepository,
   ) : super(initialState) {
     on<GetTestDataOnMainPageEvent>(
-      (event, emitter) => _getDataOnMainPageCasino(event, emitter),
+      _getDataOnMainPageCasino,
     );
     on<DataLoadedOnMainPageEvent>(
-      (event, emitter) => _dataLoadedOnMainPageCasino(event, emitter),
+      _dataLoadedOnMainPageCasino,
     );
     on<LoadingDataOnMainPageEvent>(
       (event, emitter) => emitter(LoadingMainPageState()),
     );
+    add(const GetTestDataOnMainPageEvent());
   }
+
+  final CharactersRepository _charactersRepository;
+  int _page = 1;
 
   Future<void> _dataLoadedOnMainPageCasino(
     DataLoadedOnMainPageEvent event,
     Emitter<MainPageState> emit,
   ) async {
-    if (event.characters == null) {
-      emit(SuccessfulMainPageState(event.characters!));
+    if (event.characters != null) {
+      if (state is SuccessfulMainPageState) {
+        final characters = {
+          ...(state as SuccessfulMainPageState).characters,
+          ...event.characters!
+        };
+        emit(SuccessfulMainPageState(characters.toList()));
+      } else {
+        emit(SuccessfulMainPageState(event.characters!));
+      }
     } else {
       emit(UnSuccessfulMainPageState());
     }
@@ -37,9 +46,14 @@ class MainPageBloc
     GetTestDataOnMainPageEvent event,
     Emitter<MainPageState> emit,
   ) async {
-    _charactersRepository.getCharacters(event.page).then(
+    //emit(LoadingMainPageState());
+    await _charactersRepository.getCharacters(_page).then(
       (value) {
-        add(DataLoadedOnMainPageEvent(value));
+        _page++;
+
+        if (_page < 43) {
+          add(DataLoadedOnMainPageEvent(value));
+        }
       },
     );
   }

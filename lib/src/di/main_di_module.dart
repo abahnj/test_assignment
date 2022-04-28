@@ -5,9 +5,10 @@ import 'package:http/http.dart';
 
 class MainDIModule {
   void configure(GetIt getIt) {
-    final httpClient = Client();
-
-    getIt.registerLazySingleton<CharactersRepository>(
-        () => CharactersRepositoryImpl(httpClient));
+    getIt
+      ..registerLazySingleton<Client>(() => Client())
+      ..registerLazySingleton<CharactersRepository>(
+        () => CharactersRepositoryImpl(getIt<Client>()),
+      );
   }
 }
